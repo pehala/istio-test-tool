@@ -54,15 +54,15 @@ class Puller(object):
             sp.run(['git', 'clone', self.repo])
             os.chdir('registry-puller')
 
-        sp.run(['make'])
+        #sp.run(['make'])
         os.chdir(self.savedPath)
         
     def execute(self):
         # check environment variable KUBECONFIG
-        try:
-            os.environ['KUBECONFIG']
-        except KeyError:
-            raise KeyError('Missing environment variable KUBECONFIG')
+        # try:
+        #     os.environ['KUBECONFIG']
+        # except KeyError:
+        #     raise KeyError('Missing environment variable KUBECONFIG')
         # check if oc is installed
         proc = sp.run(['oc', 'version'])
         if proc.returncode != 0:

@@ -65,10 +65,9 @@ def main():
     if not moitt.pullsec:
         raise KeyError("Missing PULL_SEC environment variable")
 
-    ocp = OCP(profile=moitt.profile, assets=moitt.assets)
-    os.environ['KUBECONFIG'] = moitt.assets + '/auth/kubeconfig'
-    
     if moitt.component == 'ocp':
+        ocp = OCP(profile=moitt.profile, assets=moitt.assets)
+        # os.environ['KUBECONFIG'] = moitt.assets + '/auth/kubeconfig'
         if moitt.install:
             # Install ocp cluster
             ocp.install()
@@ -88,16 +87,10 @@ def main():
     if moitt.component == 'registry-puller':
         puller = Puller(secret_file=moitt.pullsec)
 
-        # Read kubeadmin password
-        with open(moitt.assets + '/auth/kubeadmin-password') as f:
-            pw = f.read() 
-        ocp.login('kubeadmin', pw)
         if moitt.install:
             puller.build()
             puller.execute()
 
-        ocp.logout()
-    
     if moitt.component == 'istio':
         operator = Operator(operator_version="maistra-1.0")
         operator.mutate()
@@ -109,52 +102,38 @@ def main():
         if moitt.install:
             # deploy operators
             # Read kubeadmin password
-            """
-            with open(moitt.assets + '/auth/kubeadmin-password') as f:
-                pw = f.read() 
-            ocp.login('kubeadmin', pw)
             operator.deploy_es()
             operator.deploy_jaeger()
             operator.deploy_kiali()
             operator.deploy_istio()
             operator.check()
-            ocp.logout()
-            """
 
             # deploy controlplane
-            ocp.login('qe1', os.getenv('QE1_PWD', 'qe1pw'))
             cp.install(cr_file=moitt.crfile)
             cp.create_ns(cp.nslist)
             cp.apply_smmr()
             cp.smoke_check()
             cp.check()
-            ocp.logout()
 
             # add scc anyuid
-            with open(moitt.assets + '/auth/kubeadmin-password') as f:
-                pw = f.read() 
-            ocp.login('kubeadmin', pw)
             operator.add_anyuid("bookinfo-productpage", "bookinfo")
             operator.add_anyuid("bookinfo-reviews", "bookinfo")
             operator.add_anyuid("bookinfo-ratings-v2", "bookinfo")
             operator.add_anyuid("default", "bookinfo")
-            ocp.logout()
 
         elif moitt.uninstall:
             # uninstall controlplane
-            ocp.login('qe1', os.getenv('QE1_PWD', 'qe1pw'))
+            # ocp.login('qe1', os.getenv('QE1_PWD', 'qe1pw'))
             cp.uninstall(cr_file=moitt.crfile)
-            ocp.logout()
+            # ocp.logout()
 
             # uninstall operators
             # Read kubeadmin password
-            """
             with open(moitt.assets + '/auth/kubeadmin-password') as f:
                 pw = f.read() 
-            ocp.login('kubeadmin', pw)
+            # ocp.login('kubeadmin', pw)
             operator.uninstall()
-            ocp.logout()
-            """
+            # ocp.logout()
 
    
 if __name__ == '__main__':

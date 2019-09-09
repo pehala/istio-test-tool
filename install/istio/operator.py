@@ -91,10 +91,10 @@ class Operator(object):
 
     def deploy_istio(self, operator_file="operator_quay.yaml"):
         # check environment variable KUBECONFIG
-        try:
-            os.environ['KUBECONFIG']
-        except KeyError:
-            raise KeyError('Missing environment variable KUBECONFIG')
+        # try:
+        #     os.environ['KUBECONFIG']
+        # except KeyError:
+        #     raise KeyError('Missing environment variable KUBECONFIG')
         # check if oc is installed
         proc = sp.run(['oc', 'version'])
         if proc.returncode != 0:
